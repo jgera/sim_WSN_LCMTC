@@ -17,9 +17,9 @@ WSN_type='generic';     % il tipo di nodo che si vuole creare. Può essere un sen
                         % del tipo scelto varieranno i consumi ed i tempi delle misure/trasmissioni;
 
 WSN_node_number=20;     % il numero di nodi che costituisce la WSN
-WSN_node_distance=zeros(1,WSN_node_number)
+WSN_node_distance=zeros(1,WSN_node_number);
 for i=1:WSN_node_number % la distanza dell'i-esimo nodo della WSN dal concentratore LC-MTC
-    WSN_node_distance(i)= 15*randn+16; %è un valore random estratto da una distribuzione normale con media 16 m e deviazione standard 15 m.
+    WSN_node_distance(i)= exprnd(20);   %è un valore random estratto da una distribuzione esponenziale con media 20 m .
 end
 
 max_WSNnode_daily_tx=10;% il numero di trasmissioni massime che un nodo WSN può effettuare ogni giorno
@@ -37,7 +37,7 @@ for i=1:WSN_node_number;
     WSNnode_daily_tx(i)=randi(max_WSNnode_daily_tx);% assegna ai nodi un certo numero di trasmissioni random (numero compreso fra 0 e "max_WSN_daily_tx")
     G= G + ...                      % è la sommatoria del rapporto
         ( WSNnode_daily_tx(i)/...   % fra il numero di trasmissioni giornaliere
-        (86400 / 0.110 ))           % ed il numero di slot utili per la trasmissione al giorno (0.110 è la durata della trasmissione per un nodo "generic", in s)
+        (86400 / 0.110 ));           % ed il numero di slot utili per la trasmissione al giorno (0.110 è la durata della trasmissione per un nodo "generic", in s)
     % calcolo il numero di trasmissioni dei nodi WSN che avvengono durante
     % la singola giornata
     total_daily_WSN_tx=total_daily_WSN_tx+WSNnode_daily_tx(i);
@@ -67,7 +67,8 @@ PacchettiNonTX=2*round((PacchettiTX-PacchettiSuccTX)/2);
 profilodiPotenzaTotale=zeros(1,86400*simulation_length/resolution);
 profilodiEnergiaTotale=profilodiPotenzaTotale;
 sequenzadiTXTotale=profilodiPotenzaTotale;
-
+total_att_norx_sequence=profilodiPotenzaTotale;
+total_att_retx_sequence=profilodiPotenzaTotale;
 % Imposto le condizioni del canale trasmissivo e, in base al numero di
 % trasmissioni nella rete, stimo:
 % - il numero di collisioni dei pacchetti;
@@ -76,6 +77,7 @@ sequenzadiTXTotale=profilodiPotenzaTotale;
 
 
 % calcolo e visualizzo la potenza e l'energia assorbita da tutti i nodi
+%nodo_WSN(WSN_node_number)=WSN_node(WSN_type,WSNnode_daily_tx(WSN_node_number),resolution,simulation_length,WSN_node_distance(WSN_node_number),WSN_TXpower); %allocate the array
 for i=1:WSN_node_number;
     nodo_WSN(i)=WSN_node(WSN_type,WSNnode_daily_tx(i),resolution,simulation_length,WSN_node_distance(i),WSN_TXpower);    % il numero di trasmissioni giornaliere del nodo è random, fra 1 e "max_WSN_daily_tx"
     nodo_WSN(i).computePowerSequence();
@@ -83,8 +85,21 @@ for i=1:WSN_node_number;
     sequenzadiTXTotale=sequenzadiTXTotale + nodo_WSN(i).tx_sequence;
     profilodiPotenzaTotale=profilodiPotenzaTotale+nodo_WSN(i).power_sequence;
     profilodiEnergiaTotale=profilodiEnergiaTotale+nodo_WSN(i).energy_sequence;
-    
+    total_att_norx_sequence= total_att_norx_sequence+nodo_WSN(i).att_norx_sequence;
+    total_att_retx_sequence=total_att_retx_sequence+nodo_WSN(i).att_retx_sequence;
 end
+
+%Plot the notx & retx sequences
+figure('Name','total_att_norx_sequence & total_att_retx_sequence','NumberTitle','off');
+ylabel('TX event');
+xlabel(strcat('time [',num2str(resolution,'%d'),' s]'));
+title('Total retx & notx sequence');
+stem(total_att_norx_sequence,'color',[1 0 0]);
+hold on
+stem(total_att_retx_sequence,'color',[0 1 0]);
+legend('total_att_norx_sequence','total_att_retx_sequence','Location','northwest');
+hold off
+
 
 %Plot the Tx sequence of the whole network
 figure('Name',strcat('test WSN with ',num2str(WSN_node_number),' nodes'),'NumberTitle','off');

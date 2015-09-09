@@ -46,7 +46,7 @@ classdef node < handle
                 for i=2:(obj.sim_vector_length)
                     local_energy_sequence(i)=local_energy_sequence(i-1)+obj.power_sequence(i)*obj.resolution;  %E(n)=E(n-1)+P(n)*delta_n  (valid for i>1)
                 end
-                TotalNodeEnergy=local_energy_sequence(obj.sim_vector_length)
+                TotalNodeEnergy=local_energy_sequence(obj.sim_vector_length);
                 obj.energy_sequence=local_energy_sequence;
                 %{
                 %Plot Energy sequence

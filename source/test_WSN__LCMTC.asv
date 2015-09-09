@@ -19,7 +19,7 @@ WSN_type='generic';     % il tipo di nodo che si vuole creare. Può essere un sen
 WSN_node_number=20;     % il numero di nodi che costituisce la WSN
 WSN_node_distance=zeros(1,WSN_node_number)
 for i=1:WSN_node_number % la distanza dell'i-esimo nodo della WSN dal concentratore LC-MTC
-    WSN_node_distance(i)= 15*randn+15; %è un valore random estratto da una distribuzione normale con media 15 m e deviazione standard 15 m.
+    WSN_node_distance(i)= exprnd(20);   %è un valore random estratto da una distribuzione esponenziale con media 20 m .
 end
 
 max_WSNnode_daily_tx=10;% il numero di trasmissioni massime che un nodo WSN può effettuare ogni giorno
@@ -67,7 +67,8 @@ PacchettiNonTX=2*round((PacchettiTX-PacchettiSuccTX)/2);
 profilodiPotenzaTotale=zeros(1,86400*simulation_length/resolution);
 profilodiEnergiaTotale=profilodiPotenzaTotale;
 sequenzadiTXTotale=profilodiPotenzaTotale;
-
+total_att_norx_sequence=profilodiPotenzaTotale;
+total_att_retx_sequence=profilodiPotenzaTotale;
 % Imposto le condizioni del canale trasmissivo e, in base al numero di
 % trasmissioni nella rete, stimo:
 % - il numero di collisioni dei pacchetti;
@@ -83,7 +84,21 @@ for i=1:WSN_node_number;
     sequenzadiTXTotale=sequenzadiTXTotale + nodo_WSN(i).tx_sequence;
     profilodiPotenzaTotale=profilodiPotenzaTotale+nodo_WSN(i).power_sequence;
     profilodiEnergiaTotale=profilodiEnergiaTotale+nodo_WSN(i).energy_sequence;
+    total_att_norx_sequence= total_att_norx_sequence+nodo_WSN(i).att_norx_sequence;
+    total_att_retx_sequence=total_att_retx_sequence+nodo_WSN(i).att_retx_sequence;
 end
+
+%Plot the notx & retx sequences
+figure('Name','total_att_norx_sequence & total_att_retx_sequence','NumberTitle','off');
+ylabel('TX event');
+xlabel(strcat('time [',num2str(resolution,'%d'),' s]'));
+title('Total retx & notx sequence');
+stem(total_att_norx_sequence,'color',[1 0 0]);
+hold on
+stem(total_att_retx_sequence,'color',[0 1 0]);
+legend('total_att_norx_sequence','total_att_retx_sequence','Location','northwest');
+hold off
+
 
 %Plot the Tx sequence of the whole network
 figure('Name',strcat('test WSN with ',num2str(WSN_node_number),' nodes'),'NumberTitle','off');

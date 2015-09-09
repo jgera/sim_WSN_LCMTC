@@ -43,18 +43,17 @@ classdef WSN_node < node
             obj.att_retx_sequence = tx_sequence;
             obj.att_norx_sequence = tx_sequence;
             for i = 1:round(obj.daily_tx*obj.simulation_length)
-                tx_sequence(randi(obj.sim_vector_length)) = 1;
-            end
-            % take into account for not-received packets due to
-            % high attenuation: transmit again new packets
-            for i = 1 : length(tx_sequence)
-                if (obj.WSN_packetTX_result()==0)                       % if a packet is not received for high attenuation of the channel...
-                    obj.att_norx_sequence(i) = 1;                    % save the time of the packet into a sequence
-                    rnd_time = randi(obj.sim_vector_length);
-                    tx_sequence(rnd_time) = 1;                      % add a new packet to TX sequence: retransmit the packet
-                    obj.att_retx_sequence(rnd_time) = 1;            % also add a the packet into the list of retransmitted packets due to attenuation
+                random_time=randi(obj.sim_vector_length);
+                tx_sequence(random_time) = 1;
+                    % take into account for not-received packets due to
+                    % high attenuation: transmit again new packets
+                if (obj.WSN_packetTX_result()==0)                    % if a packet is not received for high attenuation of the channel...
+                    obj.att_norx_sequence(random_time) = 1;          % save the time of the packet into a sequence
+                    tx_sequence(obj.retx_delay) = 1;                 % add a new packet to TX sequence: retransmit the packet
+                    obj.att_retx_sequence(obj.retx_delay) = 1;       % also add a the packet into the list of retransmitted packets due to attenuation
                 end
             end
+
         end
         %% compute the sequence of the power drained by the node according to the power consumption 
         function computePowerSequence(obj)     % compute the power sequence with a with resolution of a timestep
