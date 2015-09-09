@@ -5,8 +5,9 @@ classdef node < handle
     properties
         type                % the type of the node
         daily_tx            % the number of daily transmission (it's the numbers of ones into tx_sequence)
-        resolution          % it is the resolution, in seconds, of the simulation
+        resolution          % [s] it is the resolution, in seconds, of the simulation
         simulation_length   % the length of the simulation in days
+        WSN_TXpower;        % [dBm] the TX power of the WSN transceiver
     end
     
     properties(GetAccess='public', SetAccess='protected')
@@ -15,6 +16,10 @@ classdef node < handle
         tx_sequence         % a sequence that describe the transmission events of the node itself (1 means tx 0 means no-tx)
         power_sequence      % a sequence that describe the power drained by the node itself
         energy_sequence     % a sequence that describe the energy drained by the node itself
+    end
+    
+    properties(Constant)
+        
     end
     
     methods(Access='protected')

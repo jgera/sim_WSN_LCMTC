@@ -11,7 +11,7 @@ classdef LCMTC_node < node
         IAT_mean;                       %[s]    the mean of the Inter Arrival Time used to build the exponential distribuition to model IAT of LTE packets
         Data_qty;                       %[Mb]   the amount of data to transmit over LTE network
         
-        %WSN informations
+        %WSN parameters
         WSN_RXSequence;                 % the sequence representing the WSN rx events. It's an input from whole WSN.
         
         %Energy source (harvester) and energy storage
@@ -57,8 +57,8 @@ classdef LCMTC_node < node
 
     methods
         %% The constructor of the LCMTC_node
-        function obj = LCMTC_node(type,daily_tx,resolution,simulation_length,WSN_rxSequence,batterylevel,...        %mandatory parameters
-                IAT_mean,Data_qty,Idle_PagingCycle_time,Connected_RRC_Inactivity_time,Connected_TXRX_datarate)      %optional parameters
+        function obj = LCMTC_node(type,daily_tx,resolution,simulation_length,WSN_rxSequence,batterylevel,WSN_TXpower,...         %mandatory parameters
+                IAT_mean,Data_qty,Idle_PagingCycle_time,Connected_RRC_Inactivity_time,Connected_TXRX_datarate)                  %optional parameters
             obj.sim_vector_length=86400*simulation_length/resolution;   %the length of the vectors that describe the simulation details (TXevents, Power, etc)
             obj.set_id();           % automatically set the unambiguous id of the node (implemented in "node" superclass)
             obj.type=type;
@@ -72,6 +72,7 @@ classdef LCMTC_node < node
                 error('ATTENTION! The length of "WSN_RXSequence" input parameter does not match with LCMCT_node simulation parameters (simulation length and resolution).');
             end
             obj.EnergyStoragelevel=obj.ENERGYSTORAGEMAXENERGY * batterylevel;  % the initial battery level of the concentrator (battery level is in percentage [0-1])
+            obj.WSN_TXpower=WSN_TXpower;
                
             % default parameters value: if the input parameter is not
             % specified, the default value will be adopted
@@ -82,7 +83,7 @@ classdef LCMTC_node < node
             obj.Connected_TXRX_datarate=0.5;        % [Mb/s]    minimum 59.2 kbps = 0.0592 Mbps
             
             % if input parameters are present, overwrite default values
-            mandatory_parameters=6;
+            mandatory_parameters=7;
             if nargin > mandatory_parameters
                 obj.IAT_mean=IAT_mean;
             end
