@@ -3,7 +3,7 @@ startup
 %% Si impostano alcuni parametri legati alla simulazione quali:
 resolution=1;           % la risoluzione della simulazione, in secondi;
 simulation_length=2;    % la lunghezza della simulazione, in giorni;
-WSN_TXpower=10;         % la potenza del trasmettitore WSN (del concentratore LC-MTC)
+WSN_TXpower=10;         % [dBm] la potenza del trasmettitore WSN (del concentratore LC-MTC)
                         % è impostata qui perchè quest'informazione è condivisa sia coi singoli nodi sia col
                         % concentratore
 
@@ -12,17 +12,16 @@ WSN_TXpower=10;         % la potenza del trasmettitore WSN (del concentratore LC
 %Per l'utilizzo della classe WSN_node, si inizia definendo i parametri in
 %ingresso che sono:
 
-WSN_type='generic';     % il tipo di nodo che si vuole creare. Può essere un sensore
-                        % di tipo generico, di gas, di elettricità o di acqua. A seconda 
-                        % del tipo scelto varieranno i consumi ed i tempi delle misure/trasmissioni;
+WSN_type='generic';         % il tipo di nodo che si vuole creare. Può essere un sensore
+                            % di tipo generico, di gas, di elettricità o di acqua. A seconda 
+                            % del tipo scelto varieranno i consumi ed i tempi delle misure/trasmissioni;
+WSN_node_number=20;         % il numero di nodi che costituisce la WSN
+max_WSNnode_daily_tx=10;    % il numero di trasmissioni massime che un nodo WSN può effettuare ogni giorno
 
-WSN_node_number=20;     % il numero di nodi che costituisce la WSN
 WSN_node_distance=zeros(1,WSN_node_number);
 for i=1:WSN_node_number % la distanza dell'i-esimo nodo della WSN dal concentratore LC-MTC
     WSN_node_distance(i)= exprnd(10);   %è un valore random estratto da una distribuzione esponenziale con media 10 m .
 end
-
-max_WSNnode_daily_tx=10;% il numero di trasmissioni massime che un nodo WSN può effettuare ogni giorno
 
 WSNnode_daily_tx=zeros(1,WSN_node_number);
 total_daily_WSN_tx=0;
@@ -57,13 +56,6 @@ PacchettiSuccTX=(S*86400/0.110)*simulation_length;
 % sono circa (multipli di due):
 PacchettiNonTX=2*round((PacchettiTX-PacchettiSuccTX)/2);
 
-% inoltre, dato che il canale ha le seguenti condizioni:
-
-% allora la probabilità che un pacchetto non arrivi a destinazione è:
-
-% CALCOLA!!! TROVA LA FORMULA SULLA RETE
-
-
 profilodiPotenzaTotale=zeros(1,86400*simulation_length/resolution);
 profilodiEnergiaTotale=profilodiPotenzaTotale;
 sequenzadiTXTotale=profilodiPotenzaTotale;
@@ -89,7 +81,7 @@ for i=1:WSN_node_number;
     total_att_retx_sequence=total_att_retx_sequence+nodo_WSN(i).att_retx_sequence;
 end
 
-%Plot the notx & retx sequences
+%Plot the notx & retx sequences due nto attenuation
 figure('Name','total_att_norx_sequence & total_att_retx_sequence','NumberTitle','off');
 ylabel('TX event');
 xlabel(strcat('time [',num2str(resolution,'%d'),' s]'));
@@ -99,7 +91,6 @@ hold on
 stem(total_att_retx_sequence,'color',[0 1 0]);
 legend('total-att-norx-sequence','total-att-retx-sequence','Location','northwest');
 hold off
-
 
 %Plot the Tx sequence of the whole network
 figure('Name',strcat('test WSN with ',num2str(WSN_node_number),' nodes'),'NumberTitle','off');
