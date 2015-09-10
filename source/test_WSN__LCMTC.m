@@ -19,7 +19,7 @@ WSN_type='generic';     % il tipo di nodo che si vuole creare. Può essere un sen
 WSN_node_number=20;     % il numero di nodi che costituisce la WSN
 WSN_node_distance=zeros(1,WSN_node_number);
 for i=1:WSN_node_number % la distanza dell'i-esimo nodo della WSN dal concentratore LC-MTC
-    WSN_node_distance(i)= exprnd(20);   %è un valore random estratto da una distribuzione esponenziale con media 20 m .
+    WSN_node_distance(i)= exprnd(10);   %è un valore random estratto da una distribuzione esponenziale con media 10 m .
 end
 
 max_WSNnode_daily_tx=10;% il numero di trasmissioni massime che un nodo WSN può effettuare ogni giorno
@@ -35,9 +35,9 @@ G=0;
 % nel tempo di frame
 for i=1:WSN_node_number;
     WSNnode_daily_tx(i)=randi(max_WSNnode_daily_tx);% assegna ai nodi un certo numero di trasmissioni random (numero compreso fra 0 e "max_WSN_daily_tx")
-    G= G + ...                      % è la sommatoria del rapporto
-        ( WSNnode_daily_tx(i)/...   % fra il numero di trasmissioni giornaliere
-        (86400 / 0.110 ));           % ed il numero di slot utili per la trasmissione al giorno (0.110 è la durata della trasmissione per un nodo "generic", in s)
+    G= G + ...                          % la sommatoria del rapporto...
+        ( WSNnode_daily_tx(i)/...       % ...fra il numero di trasmissioni giornaliere...
+        (86400 / 0.110 ));              % ...ed il numero di slot utili per la trasmissione al giorno (0.110 è la durata della trasmissione per un nodo "generic", in s)
     % calcolo il numero di trasmissioni dei nodi WSN che avvengono durante
     % la singola giornata
     total_daily_WSN_tx=total_daily_WSN_tx+WSNnode_daily_tx(i);
@@ -97,7 +97,7 @@ title('Total retx & notx sequence');
 stem(total_att_norx_sequence,'color',[1 0 0]);
 hold on
 stem(total_att_retx_sequence,'color',[0 1 0]);
-legend('total_att_norx_sequence','total_att_retx_sequence','Location','northwest');
+legend('total-att-norx-sequence','total-att-retx-sequence','Location','northwest');
 hold off
 
 

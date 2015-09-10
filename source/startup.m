@@ -1,4 +1,4 @@
-clear all;
+clear vars;
 close all;
 clc
 

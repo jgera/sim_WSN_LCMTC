@@ -23,13 +23,12 @@ classdef WSN_node < node
             obj.sim_vector_length=86400*simulation_length/resolution;   %the length of the vectors that describe the simulation details (TXevents, Power, etc) 
             obj.set_id();           % automatically set the unambiguous id of the node                                        
             obj.type=type;
-            obj.daily_tx=daily_tx;  
+            obj.daily_tx=daily_tx;
+            obj.distance = distance;
+            obj.WSN_TXpower = WSN_TXpower;
             obj.resolution=resolution;
             obj.simulation_length=simulation_length;
             obj.tx_sequence = computeTXSequence(obj);
-
-            obj.distance = distance;
-            obj.WSN_TXpower = WSN_TXpower;
             obj.retx_delay=obj.retx_delay/obj.resolution;   %fix the retx_delay according to resolution
         end
         
@@ -49,11 +48,10 @@ classdef WSN_node < node
                     % high attenuation: transmit again new packets
                 if (obj.WSN_packetTX_result()==0)                    % if a packet is not received for high attenuation of the channel...
                     obj.att_norx_sequence(random_time) = 1;          % save the time of the packet into a sequence
-                    tx_sequence(obj.retx_delay) = 1;                 % add a new packet to TX sequence: retransmit the packet
-                    obj.att_retx_sequence(obj.retx_delay) = 1;       % also add a the packet into the list of retransmitted packets due to attenuation
+                    tx_sequence(random_time+obj.retx_delay) = 1;            % add a new packet to TX sequence: retransmit the packet
+                    obj.att_retx_sequence(random_time+obj.retx_delay) = 1;  % also add a the packet into the list of retransmitted packets due to attenuation
                 end
             end
-
         end
         %% compute the sequence of the power drained by the node according to the power consumption 
         function computePowerSequence(obj)     % compute the power sequence with a with resolution of a timestep
