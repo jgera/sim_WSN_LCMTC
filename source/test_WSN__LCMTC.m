@@ -3,20 +3,25 @@ startup
 %% Si impostano alcuni parametri legati alla simulazione quali:
 resolution=1;           % la risoluzione della simulazione, in secondi;
 simulation_length=2;    % la lunghezza della simulazione, in giorni;
+
+% Imposto le condizioni del canale trasmissivo e, in base al numero di
+% trasmissioni nella rete, stimo:
+% - il numero di collisioni dei pacchetti;
+% - il numero dei pacchetti che non raggiungolo il destinatario a causa
+%   delle condizioni del canale trasmissivo (attenuazione, ecc).
+
 WSN_TXpower=10;         % [dBm] la potenza del trasmettitore WSN (del concentratore LC-MTC)
                         % è impostata qui perchè quest'informazione è condivisa sia coi singoli nodi sia col
                         % concentratore
 
 %% Si definisce una WSN costituita da un insieme di "numerodinodi" nodi
-
 %Per l'utilizzo della classe WSN_node, si inizia definendo i parametri in
 %ingresso che sono:
-
 WSN_type='generic';         % il tipo di nodo che si vuole creare. Può essere un sensore
                             % di tipo generico, di gas, di elettricità o di acqua. A seconda 
                             % del tipo scelto varieranno i consumi ed i tempi delle misure/trasmissioni;
 WSN_node_number=20;         % il numero di nodi che costituisce la WSN
-max_WSNnode_daily_tx=10;    % il numero di trasmissioni massime che un nodo WSN può effettuare ogni giorno
+max_WSNnode_daily_tx=50;    % il numero di trasmissioni massime che un nodo WSN può effettuare ogni giorno
 
 WSN_node_distance=zeros(1,WSN_node_number);
 for i=1:WSN_node_number % la distanza dell'i-esimo nodo della WSN dal concentratore LC-MTC
@@ -45,7 +50,6 @@ end
 % di frame. Ovviamente S <= G. Infatti S tiene conto dei pacchetti che 
 % collidono mentre G no.
 S=G*exp(-2*G);
-
 % I pacchetti che si è tentato di TX sono stati, durante tutto il tempo di 
 % simulazione:
 PacchettiTX=(G*86400/0.110)*simulation_length;
@@ -54,22 +58,18 @@ PacchettiTX=(G*86400/0.110)*simulation_length;
 PacchettiSuccTX=(S*86400/0.110)*simulation_length;
 % quindi i pacchetti non trasmessi correttamente nel tempo di simulazione 
 % sono circa (multipli di due):
-PacchettiNonTX=2*round((PacchettiTX-PacchettiSuccTX)/2);
+PacchettiNonRX=2*round((PacchettiTX-PacchettiSuccTX)/2);
 
 profilodiPotenzaTotale=zeros(1,86400*simulation_length/resolution);
 profilodiEnergiaTotale=profilodiPotenzaTotale;
 sequenzadiTXTotale=profilodiPotenzaTotale;
 total_att_norx_sequence=profilodiPotenzaTotale;
 total_att_retx_sequence=profilodiPotenzaTotale;
-% Imposto le condizioni del canale trasmissivo e, in base al numero di
-% trasmissioni nella rete, stimo:
-% - il numero di collisioni dei pacchetti;
-% - il numero dei pacchetti che non raggiungolo il destinatario a causa
-%   delle condizioni del canale trasmissivo (attenuazione, ecc).
 
-
+% prima creo i nodi (gli oggetti instanziati dalla classe WSN_node) e poi
 % calcolo e visualizzo la potenza e l'energia assorbita da tutti i nodi
-%nodo_WSN(WSN_node_number)=WSN_node(WSN_type,WSNnode_daily_tx(WSN_node_number),resolution,simulation_length,WSN_node_distance(WSN_node_number),WSN_TXpower); %allocate the array
+% infine calcolo le sequenze di eventi di tx non avvenuti con successo in
+% seguito all'attenuazione e la sequenza dei pacchetti ritrasmessi.
 for i=1:WSN_node_number;
     nodo_WSN(i)=WSN_node(WSN_type,WSNnode_daily_tx(i),resolution,simulation_length,WSN_node_distance(i),WSN_TXpower);    % il numero di trasmissioni giornaliere del nodo è random, fra 1 e "max_WSN_daily_tx"
     nodo_WSN(i).computePowerSequence();
@@ -81,15 +81,33 @@ for i=1:WSN_node_number;
     total_att_retx_sequence=total_att_retx_sequence+nodo_WSN(i).att_retx_sequence;
 end
 
-%Plot the notx & retx sequences due nto attenuation
-figure('Name','total_att_norx_sequence & total_att_retx_sequence','NumberTitle','off');
+total_coll_norx_sequence=zeros(1,86400*simulation_length/resolution);
+total_coll_retx_sequence=total_coll_norx_sequence;
+% tengo conto dei pacchetti che hanno avuto delle collisioni
+for i=1:PacchettiNonRX;     %scelgo a caso uno o più nodi che hanno avuto la collisione e gli eventi di tx non andati a buon fine
+    TX_time_instants=find(nodo_WSN(randi(WSN_node_number)).tx_sequence);    % sequenza di istanti temporali in cui avvengno le TX di un certo nodo WSN preso a caso
+    norx_time_instant=TX_time_instants(randi(length(TX_time_instants)));    % scelgo a caso l'istante temporale
+    total_coll_norx_sequence(norx_time_instant)=1;                          % aggiungo l'evento "norx" al vettore relativo
+    
+    %Occorre ritrasmettere i pacchetti che hanno avuto delle collisioni
+    total_coll_retx_sequence(norx_time_instant+round(exprnd(60/resolution)))=1;        % ritrasmette in un tempo successivo a quello della collisione, con una distribuzione exp con media 1 min
+end
+
+
+
+
+% Plot total_att_notx & total_att_retx sequences due to attenuation
+% % total_coll_notx & total_coll_retx sequences due to collisions
+figure('Name','Collision and Attenuation sequences','NumberTitle','off');
 ylabel('TX event');
 xlabel(strcat('time [',num2str(resolution,'%d'),' s]'));
-title('Total retx & notx sequence');
-stem(total_att_norx_sequence,'color',[1 0 0]);
+title('Collision and Attenuation sequences');
+stem(total_att_norx_sequence,'color','r');
 hold on
-stem(total_att_retx_sequence,'color',[0 1 0]);
-legend('total-att-norx-sequence','total-att-retx-sequence','Location','northwest');
+stem(total_att_retx_sequence,'color','g');
+stem(total_coll_norx_sequence,'color','b');
+stem(total_coll_retx_sequence,'color','m');
+legend('total-att-norx-sequence','total-att-retx-sequence','total-coll-norx-sequence','total-coll-retx-sequence','Location','northwest');
 hold off
 
 %Plot the Tx sequence of the whole network
