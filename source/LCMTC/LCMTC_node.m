@@ -13,6 +13,7 @@ classdef LCMTC_node < node
         
         %WSN parameters
         WSN_RXSequence;                 % the sequence representing the WSN rx events. It's an input from whole WSN.
+        WSN_notRXSequence;              % the sequence representing the avoided power consumption due to not received packets (for collisions or attenuations)
         
         %Energy source (harvester) and energy storage
         PV_incoming_power;              %[W]    the power harvested by energy source of LC-MTC concentrator, a PV module

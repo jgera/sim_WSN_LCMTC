@@ -5,7 +5,7 @@ classdef WSN_node < node
     properties
         %% Properties related to the Free Space Loss attenuation formula & retransmission of not-received packets
         WSN_frequency=169e6;    % the working WSN frequency
-        distance;               % the distance between the node and the concentrator; it's useful to compute the attenuation introduced by the channel.
+        distance;               % the distance between the node and the concentrator; it's used to compute the attenuation introduced by the channel.
         n=2.97;                 % the path loss factor: typically it's in the range [1.5-5] (see ROUTING PROTOCOLS FOR LOSSY WIRELESS NETWORKS here:
                                 % https://www.vutbr.cz/www_base/zav_prace_soubor_verejne.php?file_id=59199, paragraph 3.3.3)
         mu=0;                   % the mean of the random variable X, used in PathLoss formula
@@ -14,7 +14,6 @@ classdef WSN_node < node
         att_retx_sequence       % the sequence of retransmitted packets due to attenuation
         retx_delay=5            % [s] the time elapsed from transmission and the retransmission of the not-received packet
         att_norx_sequence       % the sequence of packets not received by LC-MTC due to attenuation
-
     end
     
     methods
@@ -122,9 +121,9 @@ classdef WSN_node < node
         %% compute the Path loss attenuation between the concentrator and this node.
         function PathLoss = computePathLoss(obj)
             %the refernce distance is d_0 = 1 m.
-            PathLoss =  10*log(4*pi*obj.WSN_frequency/3e8) +...                     %PL(d_0), the path loss @ distance d_0
-                        obj.n*10*log(obj.distance/1) +...                           %n 10 log(d/d_0), the path loss related to the environment
-                        lognrnd(obj.mu,obj.sigma);                                  %X_sigma, the random variable to represent shadowing locale phenomena
+            PathLoss =  10*log(4*pi*obj.WSN_frequency/3e8) +...     %PL(d_0), the path loss @ distance d_0
+                        obj.n*10*log(obj.distance/1) +...           %n 10 log(d/d_0), the path loss related to the environment
+                        lognrnd(obj.mu,obj.sigma);                  %X_sigma, the random variable to represent shadowing locale phenomena
         end
         
         %% compute if the WSN packet is received or not (return 1=received 0=not received)

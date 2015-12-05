@@ -7,7 +7,7 @@ classdef node < handle
         daily_tx            % the number of daily transmission (it's the numbers of ones into tx_sequence)
         resolution          % [s] it is the resolution, in seconds, of the simulation
         simulation_length   % the length of the simulation in days
-        WSN_TXpower;        % [dBm] the TX power of the WSN transceiver
+        WSN_TXpower;        % [dBm] the TX power of the WSN transceivers or of the concentrator
     end
     
     properties(GetAccess='public', SetAccess='protected')

@@ -10,7 +10,7 @@ simulation_length=2;    % la lunghezza della simulazione, in giorni;
 % - il numero dei pacchetti che non raggiungolo il destinatario a causa
 %   delle condizioni del canale trasmissivo (attenuazione, ecc).
 
-WSN_TXpower=10;         % [dBm] la potenza del trasmettitore WSN (del concentratore LC-MTC)
+WSN_TXpower=10;         % [dBm] la potenza dei transceiver WSN coinvolti nella rete WSN
                         % è impostata qui perchè quest'informazione è condivisa sia coi singoli nodi sia col
                         % concentratore
 
@@ -23,6 +23,7 @@ WSN_type='generic';         % il tipo di nodo che si vuole creare. Può essere un
 WSN_node_number=20;         % il numero di nodi che costituisce la WSN
 max_WSNnode_daily_tx=50;    % il numero di trasmissioni massime che un nodo WSN può effettuare ogni giorno
 
+% definisco la distanza di tutti i nodi della WSN dal concentratore LC-MTC
 WSN_node_distance=zeros(1,WSN_node_number);
 for i=1:WSN_node_number % la distanza dell'i-esimo nodo della WSN dal concentratore LC-MTC
     WSN_node_distance(i)= exprnd(10);   %è un valore random estratto da una distribuzione esponenziale con media 10 m .
@@ -52,7 +53,7 @@ end
 S=G*exp(-2*G);
 % I pacchetti che si è tentato di TX sono stati, durante tutto il tempo di 
 % simulazione:
-PacchettiTX=(G*86400/0.110)*simulation_length;
+PacchettiTX=(G*86400/0.110)*simulation_length; % 86400/0.110 è il numero di timeslot presenti ogni gg di simulazione
 % I pacchetti trasmessi con successo, saranno, durante tutto il tempo di 
 % simulazione:
 PacchettiSuccTX=(S*86400/0.110)*simulation_length;
@@ -83,6 +84,7 @@ end
 
 total_coll_norx_sequence=zeros(1,86400*simulation_length/resolution);
 total_coll_retx_sequence=total_coll_norx_sequence;
+
 % tengo conto dei pacchetti che hanno avuto delle collisioni
 for i=1:PacchettiNonRX;     %scelgo a caso uno o più nodi che hanno avuto la collisione e gli eventi di tx non andati a buon fine
     TX_time_instants=find(nodo_WSN(randi(WSN_node_number)).tx_sequence);    % sequenza di istanti temporali in cui avvengno le TX di un certo nodo WSN preso a caso
@@ -93,8 +95,10 @@ for i=1:PacchettiNonRX;     %scelgo a caso uno o più nodi che hanno avuto la col
     total_coll_retx_sequence(norx_time_instant+round(exprnd(60/resolution)))=1;        % ritrasmette in un tempo successivo a quello della collisione, con una distribuzione exp con media 1 min
 end
 
-
-
+% Calcolo la sequenza di pacchetti ricevuti dall'LT-MTC eliminando i 
+% pacchetti che hanno avuto problemi di attenuazioni e collisioni dalla 
+% sequenza di pacchetti trasmessi.
+WSN_sequenzadiRXTotale=sequenzadiTXTotale-total_coll_norx_sequence-total_att_norx_sequence;
 
 % Plot total_att_notx & total_att_retx sequences due to attenuation
 % % total_coll_notx & total_coll_retx sequences due to collisions
@@ -139,7 +143,7 @@ LCMTC_BatteryLevel=0.5;         % il livello della batteria del concentratore (5
 LCMTC_WSN_TXpower=WSN_TXpower;  % [dBm] la potenza del trasmettitore WMBUS
 
 %creo un oggetto "concentratore_LCMTC"
-concentratore_LCMTC=LCMTC_node(LCMTC_type,LCMTC_daily_tx,resolution,simulation_length,sequenzadiTXTotale,LCMTC_BatteryLevel,LCMTC_WSN_TXpower,LTEIAT_mean);
+concentratore_LCMTC=LCMTC_node(LCMTC_type,LCMTC_daily_tx,resolution,simulation_length,WSN_sequenzadiRXTotale,LCMTC_BatteryLevel,LCMTC_WSN_TXpower,LTEIAT_mean);
 
 % %Plot the WM-BUS transceiver power consumption sequence
 figure('Name',strcat('test LCMTC with ',num2str(WSN_node_number),' nodes'),'NumberTitle','off');
