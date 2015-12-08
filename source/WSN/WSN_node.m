@@ -13,7 +13,7 @@ classdef WSN_node < node
         detection_threshold=-110% [dBm] the minimum received power that results in a successful packet reception.
         att_retx_sequence       % the sequence of retransmitted packets due to attenuation
         retx_delay=5            % [s] the time elapsed from transmission and the retransmission of the not-received packet
-        att_norx_sequence       % the sequence of packets not received by LC-MTC due to attenuation
+        att_norx_sequence       % the sequence of packets not received from LC-MTC due to attenuation
     end
     
     methods
@@ -32,7 +32,7 @@ classdef WSN_node < node
         end
         
         %% the method used to build the transmitting sequence
-        %it build a uniformly distributed pseudorandom sequence in the range
+        %build a uniformly distributed pseudorandom sequence in the range
         %of the simulation and return the vector. Elements set to ones 
         %represets transmission events. Zeros elements represents no transmission.
         function tx_sequence = computeTXSequence(obj)
@@ -91,8 +91,8 @@ classdef WSN_node < node
                     warning('Chose a type between the following: generic, water, gas, electricity')
             end
             
-            TXevent_PowerProfile = computeTXeventPowerProfile(P_run,P_tx,P_rx,T_run,T_tx,T_rx) %build the PowerProfile vector (resolution of TXevent_PowerProfile=1 ms)
-            TXevent_EnergyDrained = computeTXeventEnergyDrained(TXevent_PowerProfile, obj.resolution, P_sleep)
+            TXevent_PowerProfile = computeTXeventPowerProfile(P_run,P_tx,P_rx,T_run,T_tx,T_rx); %build the PowerProfile vector (resolution of TXevent_PowerProfile=1 ms)
+            TXevent_EnergyDrained = computeTXeventEnergyDrained(TXevent_PowerProfile, obj.resolution, P_sleep);
             
             %build PowerSequence from tx_sequence and the mean power of a
             %transmission event. When no-tx events are executed, some
@@ -126,7 +126,7 @@ classdef WSN_node < node
                         lognrnd(obj.mu,obj.sigma);                  %X_sigma, the random variable to represent shadowing locale phenomena
         end
         
-        %% compute if the WSN packet is received or not (return 1=received 0=not received)
+        %% compute if the WSN packet is received or not (return 1=received;  0=not received)
         function WSNPacketReceived = WSN_packetTX_result(obj)
             RXPower=obj.WSN_TXpower-obj.computePathLoss;
             if RXPower < obj.detection_threshold                %WSN transmission failure: the packet is lost!

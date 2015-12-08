@@ -67,7 +67,7 @@ sequenzadiTXTotale=profilodiPotenzaTotale;
 total_att_norx_sequence=profilodiPotenzaTotale;
 total_att_retx_sequence=profilodiPotenzaTotale;
 
-% prima creo i nodi (gli oggetti instanziati dalla classe WSN_node) e poi
+% prima creo i nodi (gli oggetti istanziati dalla classe WSN_node) e poi
 % calcolo e visualizzo la potenza e l'energia assorbita da tutti i nodi
 % infine calcolo le sequenze di eventi di tx non avvenuti con successo in
 % seguito all'attenuazione e la sequenza dei pacchetti ritrasmessi.
@@ -92,7 +92,7 @@ for i=1:PacchettiNonRX;     %scelgo a caso uno o più nodi che hanno avuto la col
     total_coll_norx_sequence(norx_time_instant)=1;                          % aggiungo l'evento "norx" al vettore relativo
     
     %Occorre ritrasmettere i pacchetti che hanno avuto delle collisioni
-    total_coll_retx_sequence(norx_time_instant+round(exprnd(60/resolution)))=1;        % ritrasmette in un tempo successivo a quello della collisione, con una distribuzione exp con media 1 min
+    total_coll_retx_sequence(norx_time_instant+round(exprnd(60/resolution)))=1;% ritrasmette in un tempo successivo a quello della collisione, con una distribuzione exp con media 1 min
 end
 
 % Calcolo la sequenza di pacchetti ricevuti dall'LT-MTC eliminando i 
@@ -139,11 +139,11 @@ title({strcat('Energy drained by a network composed by ',num2str(WSN_node_number
 LCMTC_type='concentrator';      % può contenere qualsiasi stringa, utile per sviluppi futuri
 LCMTC_daily_tx=3;               % il numero di trasmissioni giornaliere verso la rete LTE. Da implementare i metodi annessi.
 LTEIAT_mean=7200;               % Inter Arrival Time, è l'intervallo tipico fra due trasmissioni LTE 
-LCMTC_BatteryLevel=0.5;         % il livello della batteria del concentratore (50% della capacità nominale)
+LCMTC_initBatteryLevel=0.5;     % il livello della batteria del concentratore (50% della capacità nominale)
 LCMTC_WSN_TXpower=WSN_TXpower;  % [dBm] la potenza del trasmettitore WMBUS
 
 %creo un oggetto "concentratore_LCMTC"
-concentratore_LCMTC=LCMTC_node(LCMTC_type,LCMTC_daily_tx,resolution,simulation_length,WSN_sequenzadiRXTotale,LCMTC_BatteryLevel,LCMTC_WSN_TXpower,LTEIAT_mean);
+concentratore_LCMTC=LCMTC_node(LCMTC_type,LCMTC_daily_tx,resolution,simulation_length,WSN_sequenzadiRXTotale,LCMTC_initBatteryLevel,LCMTC_WSN_TXpower,LTEIAT_mean);
 
 % %Plot the WM-BUS transceiver power consumption sequence
 figure('Name',strcat('test LCMTC with ',num2str(WSN_node_number),' nodes'),'NumberTitle','off');

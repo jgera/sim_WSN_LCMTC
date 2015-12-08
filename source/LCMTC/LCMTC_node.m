@@ -50,6 +50,7 @@ classdef LCMTC_node < node
         CONNECTED_TX_POWER_SURPLUS=     438.39e-3;  %[W/Mbps]   related to effective datarate (Connected_TXRX_datarate)!
         CONNECTED_RX_POWER_SURPLUS=     51.97e-3;   %[W/Mbps]   related to effective datarate (Connected_TXRX_datarate)!
         CONNECTED_NODATATXRX_POWER=     1060e-3;    %[W]
+  
         
         %Energy storage detail
         ENERGYSTORAGEMAXENERGY=         37296;      %[J] or [W*s]   the max value of the energy contained into device
@@ -58,7 +59,7 @@ classdef LCMTC_node < node
 
     methods
         %% The constructor of the LCMTC_node
-        function obj = LCMTC_node(type,daily_tx,resolution,simulation_length,WSN_rxSequence,batterylevel,WSN_TXpower,...         %mandatory parameters
+        function obj = LCMTC_node(type,daily_tx,resolution,simulation_length,WSN_rxSequence,init_batterylevel,WSN_TXpower,...   %mandatory parameters
                 IAT_mean,Data_qty,Idle_PagingCycle_time,Connected_RRC_Inactivity_time,Connected_TXRX_datarate)                  %optional parameters
             obj.sim_vector_length=86400*simulation_length/resolution;   %the length of the vectors that describe the simulation details (TXevents, Power, etc)
             obj.set_id();           % automatically set the unambiguous id of the node (implemented in "node" superclass)
@@ -72,7 +73,7 @@ classdef LCMTC_node < node
             else
                 error('ATTENTION! The length of "WSN_RXSequence" input parameter does not match with LCMCT_node simulation parameters (simulation length and resolution).');
             end
-            obj.EnergyStoragelevel=obj.ENERGYSTORAGEMAXENERGY * batterylevel;  % the initial battery level of the concentrator (battery level is in percentage [0-1])
+            obj.EnergyStoragelevel=obj.ENERGYSTORAGEMAXENERGY * init_batterylevel;  % the initial battery level of the concentrator (battery level is in percentage [0-1])
             obj.WSN_TXpower=WSN_TXpower;
                
             % default parameters value: if the input parameter is not
@@ -277,6 +278,7 @@ classdef LCMTC_node < node
                 %compute NET POWER that is the difference between 
                 %incoming power and drained power
                 net_power= obj.PV_incoming_power - obj.power_sequence;
+
                 figure('Name','LC-MTC powers & energy','NumberTitle','off');
                 subplot(2,1,1);
                 hold on
@@ -299,6 +301,8 @@ classdef LCMTC_node < node
                 end
 %                 TotalNodeEnergy=local_energy_sequence(obj.sim_vector_length)          %the energy level at the end of the simulation
                 obj.energy_sequence=local_energy_sequence;                              %the energy sequence accumulated into energy storage device
+                
+                
                 
                 hold on
                 stairs(obj.energy_sequence, 'b');
